@@ -1,0 +1,558 @@
+---
+title: "Writing Project"
+author: "Riley Collins"
+date: "12/14/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(rvest)
+library(ggplot2)
+library(lubridate)
+library(dplyr)
+library(quantreg)
+library(knitr)
+```
+
+# Regional Rankings
+```{R}
+# This first chunk of code only needs to be run once to archive data files into a folder
+# Once they're saved, they can be read in from that folder in the next chunk
+
+# Extracting data from TFRRS
+outdoor_2023_men_west <- read_html('https://tf.tfrrs.org/printable_lists/4163?other_lists=https%3A%2F%2Ftf.tfrrs.org%2Flists%2F4163%2F2023_NCAA_Div_I_West_Outdoor_Qualifying_FINAL&limit=500&event_type=12&year=&gender=m') %>% html_nodes('table') %>% html_table()
+
+# Selecting the 800
+outdoor_2023_men_west <- outdoor_2023_men_west[[2]]
+outdoor_2023_men_west_800 <- outdoor_2023_men_west[[5]]
+
+# Converting the time object into a number
+outdoor_2023_men_west_800 <- as.numeric(as.period(ms(outdoor_2023_men_west_800), unit = "sec"))
+
+# Creating a data frame, changing variable name and creating a csv
+# The csv is created to archive data into a folder
+outdoor_2023_men_west_800 <- as.data.frame(outdoor_2023_men_west_800)
+names(outdoor_2023_men_west_800)[names(outdoor_2023_men_west_800) == 'outdoor_2023_men_west_800'] <- 'Time'
+write.csv(outdoor_2023_men_west_800,"data/outdoor_2023_men_west_800.csv")
+
+outdoor_2022_men_west <- read_html('https://tf.tfrrs.org/printable_lists/3713?other_lists=https%3A%2F%2Fwww.tfrrs.org%2Flists%2F3713%2F2022_NCAA_Div_I_West_Outdoor_Qualifying_FINAL&limit=500&event_type=12&year=&gender=m') %>% html_nodes('table') %>% html_table()
+outdoor_2022_men_west <- outdoor_2022_men_west[[2]]
+outdoor_2022_men_west_800 <- outdoor_2022_men_west[[5]]
+outdoor_2022_men_west_800 <- as.numeric(as.period(ms(outdoor_2022_men_west_800), unit = "sec"))
+outdoor_2022_men_west_800 <- as.data.frame(outdoor_2022_men_west_800)
+names(outdoor_2022_men_west_800)[names(outdoor_2022_men_west_800) == 'outdoor_2022_men_west_800'] <- 'Time'
+write.csv(outdoor_2022_men_west_800,"data/outdoor_2022_men_west_800.csv")
+
+outdoor_2021_men_west <- read_html('https://tf.tfrrs.org/printable_lists/3713?other_lists=https%3A%2F%2Fwww.tfrrs.org%2Flists%2F3713%2F2022_NCAA_Div_I_West_Outdoor_Qualifying_FINAL&limit=500&event_type=12&year=&gender=m') %>% html_nodes('table') %>% html_table()
+outdoor_2021_men_west <- outdoor_2021_men_west[[2]]
+outdoor_2021_men_west_800 <- outdoor_2021_men_west[[5]]
+outdoor_2021_men_west_800 <- as.numeric(as.period(ms(outdoor_2021_men_west_800), unit = "sec"))
+outdoor_2021_men_west_800 <- as.data.frame(outdoor_2021_men_west_800)
+names(outdoor_2021_men_west_800)[names(outdoor_2021_men_west_800) == 'outdoor_2021_men_west_800'] <- 'Time'
+write.csv(outdoor_2021_men_west_800,"data/outdoor_2021_men_west_800.csv")
+
+outdoor_2019_men_west <- read_html('https://tf.tfrrs.org/printable_lists/2570?other_lists=https%3A%2F%2Fwww.tfrrs.org%2Flists%2F2570%2F2019_NCAA_Div_I_West_Outdoor_Qualifying_FINAL&limit=500&event_type=12&year=&gender=m') %>% html_nodes('table') %>% html_table()
+outdoor_2019_men_west <- outdoor_2019_men_west[[2]]
+outdoor_2019_men_west_800 <- outdoor_2019_men_west[[5]]
+outdoor_2019_men_west_800 <- as.numeric(as.period(ms(outdoor_2019_men_west_800), unit = "sec"))
+outdoor_2019_men_west_800 <- as.data.frame(outdoor_2019_men_west_800)
+names(outdoor_2019_men_west_800)[names(outdoor_2019_men_west_800) == 'outdoor_2019_men_west_800'] <- 'Time'
+write.csv(outdoor_2019_men_west_800,"data/outdoor_2019_men_west_800.csv")
+
+outdoor_2018_men_west <- read_html('https://tf.tfrrs.org/printable_lists/2281?other_lists=https%3A%2F%2Fwww.tfrrs.org%2Flists%2F2281%2F2018_NCAA_Div_I_West_Outdoor_Qualifying_FINAL&limit=500&event_type=12&year=&gender=m') %>% html_nodes('table') %>% html_table()
+outdoor_2018_men_west <- outdoor_2018_men_west[[2]]
+outdoor_2018_men_west_800 <- outdoor_2018_men_west[[5]]
+outdoor_2018_men_west_800 <- as.numeric(as.period(ms(outdoor_2018_men_west_800), unit = "sec"))
+outdoor_2018_men_west_800 <- as.data.frame(outdoor_2018_men_west_800)
+names(outdoor_2018_men_west_800)[names(outdoor_2018_men_west_800) == 'outdoor_2018_men_west_800'] <- 'Time'
+write.csv(outdoor_2018_men_west_800,"data/outdoor_2018_men_west_800.csv")
+
+outdoor_2017_men_west <- read_html('https://tf.tfrrs.org/printable_lists/1926?other_lists=https%3A%2F%2Ftf.tfrrs.org%2Flists%2F1926%2F2017_NCAA_Div_I_West_Outdoor_Qualifying_FINAL&limit=500&event_type=&year=&gender=m&performance_event_hnd=18605') %>% html_nodes('table') %>% html_table()
+outdoor_2017_men_west <- outdoor_2017_men_west[[2]]
+outdoor_2017_men_west_800 <- outdoor_2017_men_west[[5]]
+outdoor_2017_men_west_800 <- as.numeric(as.period(ms(outdoor_2017_men_west_800), unit = "sec"))
+outdoor_2017_men_west_800 <- as.data.frame(outdoor_2017_men_west_800)
+names(outdoor_2017_men_west_800)[names(outdoor_2017_men_west_800) == 'outdoor_2017_men_west_800'] <- 'Time'
+write.csv(outdoor_2017_men_west_800,"data/outdoor_2017_men_west_800.csv")
+
+outdoor_2016_men_west <- read_html('https://tf.tfrrs.org/printable_lists/1686?other_lists=https%3A%2F%2Fwww.tfrrs.org%2Flists%2F1686%2F2016_NCAA_Div_I_West_Outdoor_Qualifying_FINAL&limit=500&event_type=&year=&gender=&performance_event_hnd=16445') %>% html_nodes('table') %>% html_table()
+outdoor_2016_men_west <- outdoor_2016_men_west[[2]]
+outdoor_2016_men_west_800 <- outdoor_2016_men_west[[5]]
+outdoor_2016_men_west_800 <- as.numeric(as.period(ms(outdoor_2016_men_west_800), unit = "sec"))
+outdoor_2016_men_west_800 <- as.data.frame(outdoor_2016_men_west_800)
+names(outdoor_2016_men_west_800)[names(outdoor_2016_men_west_800) == 'outdoor_2016_men_west_800'] <- 'Time'
+ggplot(outdoor_2016_men_west_800,aes(x=Time)) + geom_density() + write.csv(outdoor_2016_men_west_800,"data/outdoor_2016_men_west_800.csv")
+
+outdoor_2015_men_west <- read_html('https://tf.tfrrs.org/printable_lists/1441?other_lists=https%3A%2F%2Fmobile.tfrrs.org%2Flists%2F1441%2F2015_NCAA_Div_I_West_Outdoor_Qualifying_FINAL&limit=500&event_type=12&year=&gender=m&performance_event_hnd=14031') %>% html_nodes('table') %>% html_table()
+outdoor_2015_men_west <- outdoor_2015_men_west[[2]]
+outdoor_2015_men_west_800 <- outdoor_2015_men_west[[5]]
+outdoor_2015_men_west_800 <- as.numeric(as.period(ms(outdoor_2015_men_west_800), unit = "sec"))
+outdoor_2015_men_west_800 <- as.data.frame(outdoor_2015_men_west_800)
+names(outdoor_2015_men_west_800)[names(outdoor_2015_men_west_800) == 'outdoor_2015_men_west_800'] <- 'Time'
+write.csv(outdoor_2015_men_west_800,"data/outdoor_2015_men_west_800.csv")
+
+outdoor_2014_men_west <- read_html('https://tf.tfrrs.org/printable_lists/1230?other_lists=https%3A%2F%2Ftf.tfrrs.org%2Flists%2F1230%2F2014_NCAA_Div_I_West_Outdoor_Qualifying_FINAL&limit=500&event_type=&year=&gender=m&performance_event_hnd=12001') %>% html_nodes('table') %>% html_table()
+outdoor_2014_men_west <- outdoor_2014_men_west[[2]]
+outdoor_2014_men_west_800 <- outdoor_2014_men_west[[5]]
+outdoor_2014_men_west_800 <- as.numeric(as.period(ms(outdoor_2014_men_west_800), unit = "sec"))
+outdoor_2014_men_west_800 <- as.data.frame(outdoor_2014_men_west_800)
+names(outdoor_2014_men_west_800)[names(outdoor_2014_men_west_800) == 'outdoor_2014_men_west_800'] <- 'Time'
+write.csv(outdoor_2014_men_west_800,"data/outdoor_2014_men_west_800.csv")
+
+outdoor_2013_men_west <- read_html('https://tf.tfrrs.org/printable_lists/1031?other_lists=https%3A%2F%2Ftf.tfrrs.org%2Flists%2F1031%2F2013_NCAA_Div_I_West_Outdoor_Qualifying_FINAL&limit=500&event_type=12&year=&gender=m&performance_event_hnd=10200') %>% html_nodes('table') %>% html_table()
+outdoor_2013_men_west <- outdoor_2013_men_west[[2]]
+outdoor_2013_men_west_800 <- outdoor_2013_men_west[[5]]
+outdoor_2013_men_west_800 <- as.numeric(as.period(ms(outdoor_2013_men_west_800), unit = "sec"))
+outdoor_2013_men_west_800 <- as.data.frame(outdoor_2013_men_west_800)
+names(outdoor_2013_men_west_800)[names(outdoor_2013_men_west_800) == 'outdoor_2013_men_west_800'] <- 'Time'
+write.csv(outdoor_2013_men_west_800,"data/outdoor_2013_men_west_800.csv")
+
+outdoor_2012_men_west <- read_html('https://tf.tfrrs.org/printable_lists/844?other_lists=https%3A%2F%2Ftf.tfrrs.org%2Flists%2F844%2F2012_NCAA_Div_I_West_Qualifiers_Final&limit=500&event_type=12&year=&gender=&performance_event_hnd=8521') %>% html_nodes('table') %>% html_table()
+outdoor_2012_men_west <- outdoor_2012_men_west[[2]]
+outdoor_2012_men_west_800 <- outdoor_2012_men_west[[5]]
+outdoor_2012_men_west_800 <- as.numeric(as.period(ms(outdoor_2012_men_west_800), unit = "sec"))
+outdoor_2012_men_west_800 <- as.data.frame(outdoor_2012_men_west_800)
+names(outdoor_2012_men_west_800)[names(outdoor_2012_men_west_800) == 'outdoor_2012_men_west_800'] <- 'Time'
+write.csv(outdoor_2012_men_west_800,"data/outdoor_2012_men_west_800.csv")
+
+outdoor_2011_men_west <- read_html('https://tf.tfrrs.org/printable_lists/694?other_lists=https%3A%2F%2Fwww.tfrrs.org%2Flists%2F694%2F2011_NCAA_Division_I_West_POP_List_FINAL&limit=500&event_type=&year=&gender=&performance_event_hnd=6749') %>% html_nodes('table') %>% html_table()
+outdoor_2011_men_west <- outdoor_2011_men_west[[2]]
+outdoor_2011_men_west_800 <- outdoor_2011_men_west[[5]]
+outdoor_2011_men_west_800 <- as.numeric(as.period(ms(outdoor_2011_men_west_800), unit = "sec"))
+outdoor_2011_men_west_800 <- as.data.frame(outdoor_2011_men_west_800)
+names(outdoor_2011_men_west_800)[names(outdoor_2011_men_west_800) == 'outdoor_2011_men_west_800'] <- 'Time'
+write.csv(outdoor_2011_men_west_800,"data/outdoor_2011_men_west_800.csv")
+
+outdoor_2010_men_west <- read_html('https://www.tfrrs.org/printable_lists/538?other_lists=https%3A%2F%2Ftf.tfrrs.org%2Flists%2F538%2F2010_NCAA_Division_I_West_POP_List_FINAL&limit=500&event_type=&year=&gender=&performance_event_hnd=5414') %>% html_nodes('table') %>% html_table()
+outdoor_2010_men_west <- outdoor_2010_men_west[[2]]
+outdoor_2010_men_west_800 <- outdoor_2010_men_west[[5]]
+outdoor_2010_men_west_800 <- as.numeric(as.period(ms(outdoor_2010_men_west_800), unit = "sec"))
+outdoor_2010_men_west_800 <- as.data.frame(outdoor_2010_men_west_800)
+names(outdoor_2010_men_west_800)[names(outdoor_2010_men_west_800) == 'outdoor_2010_men_west_800'] <- 'Time'
+write.csv(outdoor_2010_men_west_800,"data/outdoor_2010_men_west_800.csv")
+
+outdoor_2023_men_east <- read_html('https://tf.tfrrs.org/printable_lists/4162?other_lists=https%3A%2F%2Ftf.tfrrs.org%2Flists%2F4162%2F2023_NCAA_Div_I_East_Outdoor_Qualifying_FINAL&limit=500&event_type=12&year=&gender=m') %>% html_nodes('table') %>% html_table()
+outdoor_2023_men_east <- outdoor_2023_men_east[[2]]
+outdoor_2023_men_east_800 <- outdoor_2023_men_east[[5]]
+outdoor_2023_men_east_800 <- as.numeric(as.period(ms(outdoor_2023_men_east_800), unit = "sec"))
+outdoor_2023_men_east_800 <- as.data.frame(outdoor_2023_men_east_800)
+names(outdoor_2023_men_east_800)[names(outdoor_2023_men_east_800) == 'outdoor_2023_men_east_800'] <- 'Time'
+write.csv(outdoor_2023_men_east_800,"data/outdoor_2023_men_east_800.csv")
+
+outdoor_2022_men_east <- read_html('https://tf.tfrrs.org/printable_lists/3712?other_lists=https%3A%2F%2Ftf.tfrrs.org%2Flists%2F3712%2F2022_NCAA_Div_I_East_Outdoor_Qualifying_FINAL&limit=500&event_type=12&year=&gender=m') %>% html_nodes('table') %>% html_table()
+outdoor_2022_men_east <- outdoor_2022_men_east[[2]]
+outdoor_2022_men_east_800 <- outdoor_2022_men_east[[5]]
+outdoor_2022_men_east_800 <- as.numeric(as.period(ms(outdoor_2022_men_east_800), unit = "sec"))
+outdoor_2022_men_east_800 <- as.data.frame(outdoor_2022_men_east_800)
+names(outdoor_2022_men_east_800)[names(outdoor_2022_men_east_800) == 'outdoor_2022_men_east_800'] <- 'Time'
+write.csv(outdoor_2022_men_east_800,"data/outdoor_2022_men_east_800.csv")
+
+outdoor_2021_men_east <- read_html('https://tf.tfrrs.org/printable_lists/3192?other_lists=https%3A%2F%2Fm.tfrrs.org%2Flists%2F3192%2F2021_NCAA_Div_I_East_Outdoor_Qualifying_FINAL&limit=500&event_type=12&year=&gender=m') %>% html_nodes('table') %>% html_table()
+outdoor_2021_men_east <- outdoor_2021_men_east[[2]]
+outdoor_2021_men_east_800 <- outdoor_2021_men_east[[5]]
+outdoor_2021_men_east_800 <- as.numeric(as.period(ms(outdoor_2021_men_east_800), unit = "sec"))
+outdoor_2021_men_east_800 <- as.data.frame(outdoor_2021_men_east_800)
+names(outdoor_2021_men_east_800)[names(outdoor_2021_men_east_800) == 'outdoor_2021_men_east_800'] <- 'Time'
+write.csv(outdoor_2021_men_east_800,"data/outdoor_2021_men_east_800.csv")
+
+outdoor_2019_men_east <- read_html('https://tf.tfrrs.org/printable_lists/2569?other_lists=https%3A%2F%2Ftf.tfrrs.org%2Flists%2F2569%2F2019_NCAA_Div_I_East_Outdoor_Qualifying_FINAL&limit=500&event_type=12&year=&gender=m') %>% html_nodes('table') %>% html_table()
+outdoor_2019_men_east <- outdoor_2019_men_east[[2]]
+outdoor_2019_men_east_800 <- outdoor_2019_men_east[[5]]
+outdoor_2019_men_east_800 <- as.numeric(as.period(ms(outdoor_2019_men_east_800), unit = "sec"))
+outdoor_2019_men_east_800 <- as.data.frame(outdoor_2019_men_east_800)
+names(outdoor_2019_men_east_800)[names(outdoor_2019_men_east_800) == 'outdoor_2019_men_east_800'] <- 'Time'
+write.csv(outdoor_2019_men_east_800,"data/outdoor_2019_men_east_800.csv")
+
+outdoor_2018_men_east <- read_html('https://tf.tfrrs.org/printable_lists/2280?other_lists=https%3A%2F%2Fwww.tfrrs.org%2Flists%2F2280%2F2018_NCAA_Div_I_East_Outdoor_Qualifying_FINAL&limit=500&event_type=12&year=&gender=m') %>% html_nodes('table') %>% html_table()
+outdoor_2018_men_east <- outdoor_2018_men_east[[2]]
+outdoor_2018_men_east_800 <- outdoor_2018_men_east[[5]]
+outdoor_2018_men_east_800 <- as.numeric(as.period(ms(outdoor_2018_men_east_800), unit = "sec"))
+outdoor_2018_men_east_800 <- as.data.frame(outdoor_2018_men_east_800)
+names(outdoor_2018_men_east_800)[names(outdoor_2018_men_east_800) == 'outdoor_2018_men_east_800'] <- 'Time'
+write.csv(outdoor_2018_men_east_800,"data/outdoor_2018_men_east_800.csv")
+
+outdoor_2017_men_east <- read_html('https://tf.tfrrs.org/printable_lists/1925?other_lists=https%3A%2F%2Ftf.tfrrs.org%2Flists%2F1925%2F2017_NCAA_Div_I_East_Outdoor_Qualifying_FINAL&limit=500&event_type=&year=&gender=m&performance_event_hnd=18605') %>% html_nodes('table') %>% html_table()
+outdoor_2017_men_east <- outdoor_2017_men_east[[2]]
+outdoor_2017_men_east_800 <- outdoor_2017_men_east[[5]]
+outdoor_2017_men_east_800 <- as.numeric(as.period(ms(outdoor_2017_men_east_800), unit = "sec"))
+outdoor_2017_men_east_800 <- as.data.frame(outdoor_2017_men_east_800)
+names(outdoor_2017_men_east_800)[names(outdoor_2017_men_east_800) == 'outdoor_2017_men_east_800'] <- 'Time'
+write.csv(outdoor_2017_men_east_800,"data/outdoor_2017_men_east_800.csv")
+
+outdoor_2016_men_east <- read_html('https://tf.tfrrs.org/printable_lists/1687?other_lists=https%3A%2F%2Ftfrrs.org%2Flists%2F1687%2F2016_NCAA_Div_I_East_Outdoor_Qualifying_FINAL&limit=500&event_type=&year=&gender=&performance_event_hnd=16445') %>% html_nodes('table') %>% html_table()
+outdoor_2016_men_east <- outdoor_2016_men_east[[2]]
+outdoor_2016_men_east_800 <- outdoor_2016_men_east[[5]]
+outdoor_2016_men_east_800 <- as.numeric(as.period(ms(outdoor_2016_men_east_800), unit = "sec"))
+outdoor_2016_men_east_800 <- as.data.frame(outdoor_2016_men_east_800)
+names(outdoor_2016_men_east_800)[names(outdoor_2016_men_east_800) == 'outdoor_2016_men_east_800'] <- 'Time'
+write.csv(outdoor_2016_men_east_800,"data/outdoor_2016_men_east_800.csv")
+
+outdoor_2015_men_east <- read_html('https://tf.tfrrs.org/printable_lists/1687?other_lists=https%3A%2F%2Ftfrrs.org%2Flists%2F1687%2F2016_NCAA_Div_I_East_Outdoor_Qualifying_FINAL&limit=500&event_type=&year=&gender=&performance_event_hnd=16445') %>% html_nodes('table') %>% html_table()
+outdoor_2015_men_east <- outdoor_2015_men_east[[2]]
+outdoor_2015_men_east_800 <- outdoor_2015_men_east[[5]]
+outdoor_2015_men_east_800 <- as.numeric(as.period(ms(outdoor_2015_men_east_800), unit = "sec"))
+outdoor_2015_men_east_800 <- as.data.frame(outdoor_2015_men_east_800)
+names(outdoor_2015_men_east_800)[names(outdoor_2015_men_east_800) == 'outdoor_2015_men_east_800'] <- 'Time'
+write.csv(outdoor_2015_men_east_800,"data/outdoor_2015_men_east_800.csv")
+
+outdoor_2014_men_east <- read_html('https://www.tfrrs.org/printable_lists/1229?other_lists=https%3A%2F%2Fwww.tfrrs.org%2Flists%2F1229%2F2014_NCAA_Div_I_East_Outdoor_Qualifying_FINAL&limit=500&event_type=&year=&gender=&performance_event_hnd=12001') %>% html_nodes('table') %>% html_table()
+outdoor_2014_men_east <- outdoor_2014_men_east[[2]]
+outdoor_2014_men_east_800 <- outdoor_2014_men_east[[5]]
+outdoor_2014_men_east_800 <- as.numeric(as.period(ms(outdoor_2014_men_east_800), unit = "sec"))
+outdoor_2014_men_east_800 <- as.data.frame(outdoor_2014_men_east_800)
+names(outdoor_2014_men_east_800)[names(outdoor_2014_men_east_800) == 'outdoor_2014_men_east_800'] <- 'Time'
+write.csv(outdoor_2014_men_east_800,"data/outdoor_2014_men_east_800.csv")
+
+outdoor_2013_men_east <- read_html('https://www.tfrrs.org/printable_lists/1030?other_lists=https%3A%2F%2Ftf.tfrrs.org%2Flists%2F1030%2F2013_NCAA_Div_I_East_Outdoor_Qualifying_FINAL&limit=500&event_type=&year=&gender=&performance_event_hnd=10200') %>% html_nodes('table') %>% html_table()
+outdoor_2013_men_east <- outdoor_2013_men_east[[2]]
+outdoor_2013_men_east_800 <- outdoor_2013_men_east[[5]]
+outdoor_2013_men_east_800 <- as.numeric(as.period(ms(outdoor_2013_men_east_800), unit = "sec"))
+outdoor_2013_men_east_800 <- as.data.frame(outdoor_2013_men_east_800)
+names(outdoor_2013_men_east_800)[names(outdoor_2013_men_east_800) == 'outdoor_2013_men_east_800'] <- 'Time'
+write.csv(outdoor_2013_men_east_800,"data/outdoor_2013_men_east_800.csv")
+
+outdoor_2012_men_east <- read_html('https://tf.tfrrs.org/printable_lists/843?other_lists=https%3A%2F%2Ftf.tfrrs.org%2Flists%2F843%2F2012_NCAA_Div_I_East_Qualifiers_Final&limit=500&event_type=&year=&gender=&performance_event_hnd=8521') %>% html_nodes('table') %>% html_table()
+outdoor_2012_men_east <- outdoor_2012_men_east[[2]]
+outdoor_2012_men_east_800 <- outdoor_2012_men_east[[5]]
+outdoor_2012_men_east_800 <- as.numeric(as.period(ms(outdoor_2012_men_east_800), unit = "sec"))
+outdoor_2012_men_east_800 <- as.data.frame(outdoor_2012_men_east_800)
+names(outdoor_2012_men_east_800)[names(outdoor_2012_men_east_800) == 'outdoor_2012_men_east_800'] <- 'Time'
+write.csv(outdoor_2012_men_east_800,"data/outdoor_2012_men_east_800.csv")
+
+outdoor_2011_men_east <- read_html('https://tf.tfrrs.org/printable_lists/693?other_lists=https%3A%2F%2Fwww.tfrrs.org%2Flists%2F693%2F2011_NCAA_Division_I_East_POP_List_FINAL&limit=500&event_type=&year=&gender=&performance_event_hnd=6749') %>% html_nodes('table') %>% html_table()
+outdoor_2011_men_east <- outdoor_2011_men_east[[2]]
+outdoor_2011_men_east_800 <- outdoor_2011_men_east[[5]]
+outdoor_2011_men_east_800 <- as.numeric(as.period(ms(outdoor_2011_men_east_800), unit = "sec"))
+outdoor_2011_men_east_800 <- as.data.frame(outdoor_2011_men_east_800)
+names(outdoor_2011_men_east_800)[names(outdoor_2011_men_east_800) == 'outdoor_2011_men_east_800'] <- 'Time'
+write.csv(outdoor_2011_men_east_800,"data/outdoor_2011_men_east_800.csv")
+
+outdoor_2010_men_east <- read_html('https://www.tfrrs.org/printable_lists/537?other_lists=https%3A%2F%2Fwww.tfrrs.org%2Flists%2F537%2F2010_NCAA_Division_I_East_POP_List_FINAL&limit=500&event_type=&year=&gender=&performance_event_hnd=5414') %>% html_nodes('table') %>% html_table()
+outdoor_2010_men_east <- outdoor_2010_men_east[[2]]
+outdoor_2010_men_east_800 <- outdoor_2010_men_east[[5]]
+outdoor_2010_men_east_800 <- as.numeric(as.period(ms(outdoor_2010_men_east_800), unit = "sec"))
+outdoor_2010_men_east_800 <- as.data.frame(outdoor_2010_men_east_800)
+names(outdoor_2010_men_east_800)[names(outdoor_2010_men_east_800) == 'outdoor_2010_men_east_800'] <- 'Time'
+write.csv(outdoor_2010_men_east_800,"data/outdoor_2010_men_east_800.csv")
+```
+
+```{R}
+# This section reads in the archived data files
+outdoor_2023_men_west_800 <- read.csv("data/outdoor_2023_men_west_800.csv")
+outdoor_2022_men_west_800 <- read.csv("data/outdoor_2022_men_west_800.csv")
+outdoor_2021_men_west_800 <- read.csv("data/outdoor_2021_men_west_800.csv")
+outdoor_2019_men_west_800 <- read.csv("data/outdoor_2019_men_west_800.csv")
+outdoor_2018_men_west_800 <- read.csv("data/outdoor_2018_men_west_800.csv")
+outdoor_2017_men_west_800 <- read.csv("data/outdoor_2017_men_west_800.csv")
+outdoor_2016_men_west_800 <- read.csv("data/outdoor_2016_men_west_800.csv")
+outdoor_2015_men_west_800 <- read.csv("data/outdoor_2015_men_west_800.csv")
+outdoor_2014_men_west_800 <- read.csv("data/outdoor_2014_men_west_800.csv")
+outdoor_2013_men_west_800 <- read.csv("data/outdoor_2013_men_west_800.csv")
+outdoor_2012_men_west_800 <- read.csv("data/outdoor_2012_men_west_800.csv")
+outdoor_2011_men_west_800 <- read.csv("data/outdoor_2011_men_west_800.csv")
+outdoor_2010_men_west_800 <- read.csv("data/outdoor_2010_men_west_800.csv")
+
+outdoor_2023_men_east_800 <- read.csv("data/outdoor_2023_men_east_800.csv")
+outdoor_2022_men_east_800 <- read.csv("data/outdoor_2022_men_east_800.csv")
+outdoor_2021_men_east_800 <- read.csv("data/outdoor_2021_men_east_800.csv")
+outdoor_2019_men_east_800 <- read.csv("data/outdoor_2019_men_east_800.csv")
+outdoor_2018_men_east_800 <- read.csv("data/outdoor_2018_men_east_800.csv")
+outdoor_2017_men_east_800 <- read.csv("data/outdoor_2017_men_east_800.csv")
+outdoor_2016_men_east_800 <- read.csv("data/outdoor_2016_men_east_800.csv")
+outdoor_2015_men_east_800 <- read.csv("data/outdoor_2015_men_east_800.csv")
+outdoor_2014_men_east_800 <- read.csv("data/outdoor_2014_men_east_800.csv")
+outdoor_2013_men_east_800 <- read.csv("data/outdoor_2013_men_east_800.csv")
+outdoor_2012_men_east_800 <- read.csv("data/outdoor_2012_men_east_800.csv")
+outdoor_2011_men_east_800 <- read.csv("data/outdoor_2011_men_east_800.csv")
+outdoor_2010_men_east_800 <- read.csv("data/outdoor_2010_men_east_800.csv")
+
+outdoor_2023_men_west_800$year <- 2023
+outdoor_2022_men_west_800$year <- 2022
+outdoor_2021_men_west_800$year <- 2021
+outdoor_2019_men_west_800$year <- 2019
+outdoor_2018_men_west_800$year <- 2018
+outdoor_2017_men_west_800$year <- 2017
+outdoor_2016_men_west_800$year <- 2016
+outdoor_2015_men_west_800$year <- 2015
+outdoor_2014_men_west_800$year <- 2014
+outdoor_2013_men_west_800$year <- 2013
+outdoor_2012_men_west_800$year <- 2012
+outdoor_2011_men_west_800$year <- 2011
+outdoor_2010_men_west_800$year <- 2010
+
+outdoor_2023_men_east_800$year <- 2023
+outdoor_2022_men_east_800$year <- 2022
+outdoor_2021_men_east_800$year <- 2021
+outdoor_2019_men_east_800$year <- 2019
+outdoor_2018_men_east_800$year <- 2018
+outdoor_2017_men_east_800$year <- 2017
+outdoor_2016_men_east_800$year <- 2016
+outdoor_2015_men_east_800$year <- 2015
+outdoor_2014_men_east_800$year <- 2014
+outdoor_2013_men_east_800$year <- 2013
+outdoor_2012_men_east_800$year <- 2012
+outdoor_2011_men_east_800$year <- 2011
+outdoor_2010_men_east_800$year <- 2010
+
+outdoor_2023_men_west_800$region <- "west"
+outdoor_2022_men_west_800$region <- "west"
+outdoor_2021_men_west_800$region <- "west"
+outdoor_2019_men_west_800$region <- "west"
+outdoor_2018_men_west_800$region <- "west"
+outdoor_2017_men_west_800$region <- "west"
+outdoor_2016_men_west_800$region <- "west"
+outdoor_2015_men_west_800$region <- "west"
+outdoor_2014_men_west_800$region <- "west"
+outdoor_2013_men_west_800$region <- "west"
+outdoor_2012_men_west_800$region <- "west"
+outdoor_2011_men_west_800$region <- "west"
+outdoor_2010_men_west_800$region <- "west"
+
+outdoor_2023_men_east_800$region <- "east"
+outdoor_2022_men_east_800$region <- "east"
+outdoor_2021_men_east_800$region <- "east"
+outdoor_2019_men_east_800$region <- "east"
+outdoor_2018_men_east_800$region <- "east"
+outdoor_2017_men_east_800$region <- "east"
+outdoor_2016_men_east_800$region <- "east"
+outdoor_2015_men_east_800$region <- "east"
+outdoor_2014_men_east_800$region <- "east"
+outdoor_2013_men_east_800$region <- "east"
+outdoor_2012_men_east_800$region <- "east"
+outdoor_2011_men_east_800$region <- "east"
+outdoor_2010_men_east_800$region <- "east"
+
+# For each region, data files from all years are merged into one
+outdoor_allyears_men_west_800 <- rbind(outdoor_2023_men_west_800,outdoor_2022_men_west_800,outdoor_2021_men_west_800,outdoor_2019_men_west_800,outdoor_2018_men_west_800,outdoor_2017_men_west_800,outdoor_2016_men_west_800,outdoor_2015_men_west_800,outdoor_2014_men_west_800,outdoor_2013_men_west_800,outdoor_2012_men_west_800,outdoor_2011_men_west_800,outdoor_2010_men_west_800)
+# 'Year' is converted into a factor to generate plots below
+outdoor_allyears_men_west_800$year <- as.factor(outdoor_allyears_men_west_800$year)
+
+outdoor_allyears_men_east_800 <- rbind(outdoor_2023_men_east_800,outdoor_2022_men_east_800,outdoor_2021_men_east_800,outdoor_2019_men_east_800,outdoor_2018_men_east_800,outdoor_2017_men_east_800,outdoor_2016_men_east_800,outdoor_2015_men_east_800,outdoor_2014_men_east_800,outdoor_2013_men_east_800,outdoor_2012_men_east_800,outdoor_2011_men_east_800,outdoor_2010_men_east_800)
+outdoor_allyears_men_east_800$year <- as.factor(outdoor_allyears_men_east_800$year)
+
+# These two plots were not included in the paper but code for them is here for reference
+# They are the same density plots in the paper but also include years with incomplete data
+ggplot(outdoor_allyears_men_west_800,aes(x=Time,col=year))+geom_density(alpha=0.5) + ggtitle("Density for 800m Times in West Region by Year") + xlab("Time in seconds") + ylab("Density") + theme_bw()
+ggsave("figures/allyears_west.png")
+
+ggplot(outdoor_allyears_men_east_800,aes(x=Time,col=year))+geom_density(alpha=0.5) + ggtitle("Density for 800m Times in East Region by Year") + xlab("Time in seconds") + ylab("Density") + theme_bw()
+ggsave("figures/allyears_east.png")
+
+# Years with complete data are separated
+outdoor_mostyears_men_west_800 <- subset(outdoor_allyears_men_west_800,year %in% c(2010,2011,2014,2018,2019,2021,2022,2023))
+outdoor_mostyears_men_east_800 <- subset(outdoor_allyears_men_east_800,year %in% c(2010,2011,2014,2018,2019,2021,2022,2023))
+
+# These are the density plots that appear in the paper
+ggplot(outdoor_mostyears_men_west_800,aes(x=Time,col=year))+geom_density(alpha=0.5) + ggtitle("Density for 800m Times in West Region by Year") + xlab("Time in seconds") + ylab("Density") + scale_x_continuous(limits = c(102,122)) + scale_y_continuous(limits = c(0,0.2)) + theme_bw()
+ggsave("figures/mostyears_west.png")
+
+ggplot(outdoor_mostyears_men_east_800,aes(x=Time,col=year))+geom_density(alpha=0.5) + ggtitle("Density for 800m Times in East Region by Year") + xlab("Time in seconds") + ylab("Density") + scale_x_continuous(limits = c(102,122)) + scale_y_continuous(limits = c(0,0.2)) + theme_bw()
+ggsave("figures/mostyears_east.png")
+```
+
+```{R}
+# Year is transformed so that 2020 corresponds to year 0
+outdoor_allyears_men_west_800$year <- as.numeric(outdoor_allyears_men_west_800$year)
+for(i in 1:length(outdoor_allyears_men_west_800$year)){
+  if(outdoor_allyears_men_west_800$year[i]>10){
+outdoor_allyears_men_west_800$year[i] <-   outdoor_allyears_men_west_800$year[i] + 1
+}}
+
+outdoor_allyears_men_east_800$year <- as.numeric(outdoor_allyears_men_east_800$year)
+for(i in 1:length(outdoor_allyears_men_east_800$year)){
+  if(outdoor_allyears_men_east_800$year[i]>10){
+outdoor_allyears_men_east_800$year[i] <-   outdoor_allyears_men_east_800$year[i] + 1
+  }}
+
+outdoor_allyears_men_west_800$year <- outdoor_allyears_men_west_800$year-11
+outdoor_allyears_men_east_800$year <- outdoor_allyears_men_east_800$year-11
+
+outdoor_mostyears_men_west_800$year <- as.numeric(outdoor_mostyears_men_west_800$year)
+for(i in 1:length(outdoor_mostyears_men_west_800$year)){
+  if(outdoor_mostyears_men_west_800$year[i]>10){
+outdoor_mostyears_men_west_800$year[i] <-   outdoor_mostyears_men_west_800$year[i] + 1
+}}
+
+outdoor_mostyears_men_east_800$year <- as.numeric(outdoor_mostyears_men_east_800$year)
+for(i in 1:length(outdoor_mostyears_men_east_800$year)){
+  if(outdoor_mostyears_men_east_800$year[i]>10){
+outdoor_mostyears_men_east_800$year[i] <-   outdoor_mostyears_men_east_800$year[i] + 1
+}}
+
+outdoor_mostyears_men_west_800$year <- outdoor_mostyears_men_west_800$year-11
+outdoor_mostyears_men_east_800$year <- outdoor_mostyears_men_east_800$year-11
+```
+
+```{R}
+# Intercept only model
+model0_west <- rq(Time~1,tau=0.12,data=outdoor_mostyears_men_west_800)
+model0_east <- rq(Time~1,tau=0.12,data=outdoor_mostyears_men_east_800)
+summary(model0_west)
+summary(model0_east)
+
+# Year model
+model1 <- rq(Time~year,tau=0.12,data=outdoor_mostyears_men_west_800)
+model2 <- rq(Time~year,tau=0.12,data=outdoor_mostyears_men_east_800)
+summary(model1)
+summary(model2)
+```
+
+```{R}
+# Post2020 indicator is created
+outdoor_mostyears_men_west_800$post2020 <- 0
+for(i in 1:length(outdoor_mostyears_men_west_800$post2020)){
+  if(outdoor_mostyears_men_west_800$year[i] > 0){
+    outdoor_mostyears_men_west_800$post2020[i] <- 1
+  }
+}
+outdoor_mostyears_men_east_800$post2020 <- 0
+for(i in 1:length(outdoor_mostyears_men_east_800$post2020)){
+  if(outdoor_mostyears_men_east_800$year[i] > 0){
+    outdoor_mostyears_men_east_800$post2020[i] <- 1
+  }
+}
+
+# Post2020 model
+model3 <- rq(Time~post2020,tau=0.12,data=outdoor_mostyears_men_west_800)
+model4 <- rq(Time~post2020,tau=0.12,data=outdoor_mostyears_men_east_800)
+summary(model3)
+summary(model4)
+
+# Year and Post 2020 model without interaction
+model5 <- rq(Time~year+post2020,tau=0.12,data=outdoor_mostyears_men_west_800)
+model6 <- rq(Time~year+post2020,tau=0.12,data=outdoor_mostyears_men_east_800)
+summary(model5)
+summary(model6)
+
+# Year and Post 2020 model with interaction
+model7 <- rq(Time~year*post2020,tau=0.12,data=outdoor_mostyears_men_west_800)
+model8 <- rq(Time~year*post2020,tau=0.12,data=outdoor_mostyears_men_east_800)
+summary(model7)
+summary(model8)
+
+# AIC to compare model performance
+AIC(model0_west)
+AIC(model0_east)
+AIC(model1)
+AIC(model2)
+AIC(model3)
+AIC(model4)
+AIC(model5)
+AIC(model6)
+AIC(model7)
+AIC(model8)
+
+summary_west <- summary.rq(model7)
+summary_east <- summary.rq(model8)
+
+# Confidence intervals are created for the interaction models
+outdoor_mostyears_men_west_800 <- 
+  outdoor_mostyears_men_west_800 %>% mutate(fits_hockey = predict(model7))
+
+# Vector for covariate values
+xs <- data.frame(bind_cols(Intercept = 1, year = c(-10,-9,-6,-2,-1,1,2,3),post2020 = c(0,0,0,0,0,1,1,1)))
+xs <- xs %>% mutate('year:post2020' = year*post2020)
+xsM <- as.matrix(xs)
+s7 <- summary(model7, cov=TRUE)
+
+# Coefficient values are extracted from model summary and used to calculate fitted values
+betahat <- as.vector(model7$coefficients)
+fitsobs <- xsM %*%betahat
+
+# Covariance matrix is used to calculate standard errors
+vc7 <- as.matrix(s7$cov)
+sqrt(diag(vc7))
+SEs_west <- sqrt(diag(xsM %*% vc7 %*%t(xsM)))
+
+# Lower and upper bounds are calculated for the confidence intervals
+LL_west <- fitsobs - qt(.975, df = s7$rdf, lower.tail = T)*SEs_west
+UL_west <- fitsobs + qt(.975, df = s7$rdf, lower.tail = T)*SEs_west
+toplotw <- data.frame(xs, fitsobs, LL_west, UL_west)
+
+# Lower and upper bounds are replicated to be same length as data
+LL_west_full <- c(rep(LL_west[8],500),rep(LL_west[7],500),rep(LL_west[6],500),rep(LL_west[5],500),rep(LL_west[4],499),rep(LL_west[3],500),rep(LL_west[2],500),rep(LL_west[1],500))
+UL_west_full <- c(rep(UL_west[8],500),rep(UL_west[7],500),rep(UL_west[6],500),rep(UL_west[5],500),rep(UL_west[4],499),rep(UL_west[3],500),rep(UL_west[2],500),rep(UL_west[1],500))
+
+# OLS, 50th percentile and 12th percentile with confidence intervals plot
+ggplot(outdoor_mostyears_men_west_800,aes(x=year,y=Time)) + geom_jitter(alpha=0.1) + geom_quantile(quantiles=0.5,col="blue") + geom_quantile(quantiles=0.12,col="red") + geom_smooth(method="lm",col="green",lty=2) + geom_ribbon(aes(x = year, ymin = LL_west_full, ymax = UL_west_full), fill = "beige", color = "darkred", lty = 2, lwd = .5, alpha = 0.4) + facet_wrap(~post2020,labeller=labeller(post2020=c("0"="Before","1"="After"))) + theme_bw()
+ggsave("quantreg_west.png")
+
+outdoor_mostyears_men_east_800 <- 
+  outdoor_mostyears_men_east_800 %>% mutate(fits_hockey = predict(model8))
+xs <- data.frame(bind_cols(Intercept = 1, year = c(-10,-9,-6,-2,-1,1,2,3),post2020 = c(0,0,0,0,0,1,1,1)))
+xs <- xs %>% mutate('year:post2020' = year*post2020)
+xsM <- as.matrix(xs)
+s8 <- summary(model8, cov=TRUE)
+betahat <- as.vector(model8$coefficients)
+fitsobs <- xsM %*%betahat 
+vc8 <- as.matrix(s8$cov)
+sqrt(diag(vc8))
+SEs_east <- sqrt(diag(xsM %*% vc8 %*%t(xsM)))
+LL_east <- fitsobs - qt(.975, df = s8$rdf, lower.tail = T)*SEs_east
+UL_east <- fitsobs + qt(.975, df = s8$rdf, lower.tail = T)*SEs_east
+toplotw <- data.frame(xs, fitsobs, LL_east, UL_east)
+
+LL_east_full <- c(rep(LL_east[8],501),rep(LL_east[7],500),rep(LL_east[6],500),rep(LL_east[5],500),rep(LL_east[4],500),rep(LL_east[3],500),rep(LL_east[2],500),rep(LL_east[1],500))
+UL_east_full <- c(rep(UL_east[8],501),rep(UL_east[7],500),rep(UL_east[6],500),rep(UL_east[5],500),rep(UL_east[4],500),rep(UL_east[3],500),rep(UL_east[2],500),rep(UL_east[1],500))
+
+ggplot(outdoor_mostyears_men_east_800,aes(x=year,y=Time)) + geom_jitter(alpha=0.1) + geom_quantile(quantiles=0.5,col="blue") + geom_quantile(quantiles=0.12,col="red") + geom_smooth(method="lm",col="green",lty=2) + geom_ribbon(aes(x = year, ymin = LL_east_full, ymax = UL_east_full), fill = "beige", color = "darkred", lty = 2, lwd = .5, alpha = 0.4) + facet_wrap(~post2020,labeller=labeller(post2020=c("0"="Before","1"="After"))) + theme_bw()
+ggsave("figures/quantreg_east.png")
+```
+
+```{R qualifiers_by_year,echo=F}
+# Residuals are shown for each model and region for all data points
+resid0_west <- residuals(model0_west)
+length0_west <- length(resid0_west)
+# The proportion of negative residuals is calculated
+resid0_west <- resid0_west[resid0_west<0]
+length(resid0_west)/length0_west
+
+resid0_east <- residuals(model0_east)
+length0_east <- length(resid0_east)
+resid0_east <- resid0_east[resid0_east<0]
+length(resid0_east)/length0_east
+
+resid1 <- residuals(model1)
+length1 <- length(resid1)
+resid1 <- resid1[resid1<0]
+length(resid1)/length1
+
+resid2 <- residuals(model2)
+length2 <- length(resid2)
+resid2 <- resid2[resid2<0]
+length(resid2)/length2
+
+resid3 <- residuals(model3)
+length3 <- length(resid3)
+resid3 <- resid3[resid3<0]
+length(resid3)/length3
+
+resid4 <- residuals(model4)
+length4 <- length(resid4)
+resid4 <- resid4[resid4<0]
+length(resid4)/length4
+
+resid5 <- residuals(model5)
+length5 <- length(resid5)
+resid5 <- resid5[resid5<0]
+length(resid5)/length5
+
+resid6 <- residuals(model6)
+length6 <- length(resid6)
+resid6 <- resid6[resid6<0]
+length(resid6)/length6
+
+resid7 <- residuals(model7)
+length7 <- length(resid7)
+resid7 <- resid7[resid7<0]
+length(resid7)/length7
+
+resid8 <- residuals(model8)
+length8 <- length(resid8)
+resid8 <- resid8[resid8<0]
+length(resid8)/length8
+
+# Predictions for 12th percentile (slowest qualifying time) in 2024
+predict.rq(model7,newdata=list(year=4,post2020=1),interval="confidence")
+predict.rq(model8,newdata=list(year=4,post2020=1),interval="confidence")
+```
